@@ -10,7 +10,7 @@ import SidebarFooter from "./SidebarFooter";
 
 const Sidebar: React.FC = () => {
   return (
-    <aside className="w-64 h-screen fixed top-0 left-0 bg-gray-900 text-white flex flex-col border-r border-gray-700">
+    <aside className="w-64 h-screen fixed top-0 left-0 bg-gray-950 text-white flex flex-col border-r border-gray-700">
       <SidebarLogo />
 
       <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-2">
