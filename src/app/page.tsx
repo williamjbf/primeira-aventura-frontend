@@ -5,10 +5,40 @@ import {useEffect, useState} from "react";
 import NewTableCardGrid from "@/components/components/Table/NewTableCardGrid";
 import Topbar from "@/components/components/Topbar/Topbar";
 import {TableCarousel} from "@/components/components/Table/TableCarousel";
+import {apiFetch} from "@/services/api";
+import {ApiTable, getRecentTables} from "@/services/table";
+
+function getTimeAgo(dateString: string): string {
+  const now = new Date();
+  const past = new Date(dateString);
+  const diffMs = now.getTime() - past.getTime();
+
+  const seconds = Math.floor(diffMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return `${seconds} segundo${seconds > 1 ? "s" : ""} atrás`;
+  if (minutes < 60) return `${minutes} minuto${minutes > 1 ? "s" : ""} atrás`;
+  if (hours < 24) return `${hours} hora${hours > 1 ? "s" : ""} atrás`;
+  return `${days} dia${days > 1 ? "s" : ""} atrás`;
+}
 
 export default function Home() {
 
   const [scrolled, setScrolled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [recentTables, setRecentTables] = useState<
+    {
+      imageUrl: string;
+      title: string;
+      system: string;
+      gmName: string;
+      timeAgo: string;
+    }[]
+  >([]);
+
 
   useEffect(() => {
     const onScroll = () => {
@@ -19,109 +49,31 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const sidebarWidth = "16rem"
-
-  const recentTables = [
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Aventura nas Montanhas",
-      system: "D&D 5e",
-      gmName: "Carlos",
-      timeAgo: "8 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Mistério em Ravenloft",
-      system: "D&D 5e",
-      gmName: "Maria",
-      timeAgo: "11 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Exploração Espacial",
-      system: "Space RPG",
-      gmName: "João",
-      timeAgo: "17 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Aventura nas Montanhas",
-      system: "D&D 5e",
-      gmName: "Carlos",
-      timeAgo: "8 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Mistério em Ravenloft",
-      system: "D&D 5e",
-      gmName: "Maria",
-      timeAgo: "11 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Exploração Espacial",
-      system: "Space RPG",
-      gmName: "João",
-      timeAgo: "17 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-    {
-      imageUrl: "https://placehold.co/600x400",
-      title: "Reinos Perdidos",
-      system: "Pathfinder",
-      gmName: "Ana",
-      timeAgo: "39 minutos atrás",
-    },
-
-  ];
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const apiData = await getRecentTables();
+        if (!mounted) return;
+        const mapped = apiData.slice(0, 16).map((mesa: ApiTable) => ({
+          imageUrl: mesa.imagem,
+          title: mesa.titulo,
+          system: mesa.sistema,
+          gmName: mesa.mestreNome,
+          timeAgo: getTimeAgo(mesa.createdAt),
+        }));
+        setRecentTables(mapped);
+      } catch (err: any) {
+        console.error("Erro ao buscar mesas recentes:", err);
+        setError(err?.general || err?.message || "Erro ao carregar mesas recentes");
+      } finally {
+        setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const mesas = [
     {
@@ -185,10 +137,10 @@ export default function Home() {
         <div className="pt-16 px-6 max-w-7xl mx-auto space-y-10">
           {/* Bloco Mesas recentes */}
           <section>
-            <h2 className="text-xl font-bold text-white mb-4">
-              Mesas recentes
-            </h2>
-            <NewTableCardGrid tables={recentTables} />
+            <h2 className="text-xl font-bold text-white mb-4">Mesas recentes</h2>
+            {loading && <p className="text-gray-400">Carregando...</p>}
+            {error && <p className="text-red-400">{error}</p>}
+            {!loading && !error && <NewTableCardGrid tables={recentTables} />}
           </section>
 
           <section>
