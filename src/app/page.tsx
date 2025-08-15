@@ -4,6 +4,7 @@ import Sidebar from "@/components/components/Sidebar/Sidebar";
 import {useEffect, useState} from "react";
 import NewTableCardGrid from "@/components/components/Table/NewTableCardGrid";
 import Topbar from "@/components/components/Topbar/Topbar";
+import {TableCarousel} from "@/components/components/Table/TableCarousel";
 
 export default function Home() {
 
@@ -122,6 +123,55 @@ export default function Home() {
 
   ];
 
+  const mesas = [
+    {
+      imagem: "https://placehold.co/600x400",
+      titulo: "A Sombra de Eldoria",
+      resumo:
+        "Em um reino antigo, forças sombrias ameaçam devorar tudo. Os jogadores devem investigar as ruínas e sobreviver a horrores indescritíveis...",
+      sistema: "Tormenta20",
+      organizador: "Carlos Andrade",
+      tags: ["Terror", "Fantasia", "Investigação"],
+    },
+    {
+      imagem: "https://placehold.co/600x400",
+      titulo: "Caçada Sob a Lua",
+      resumo:
+        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
+      sistema: "D&D 5e",
+      organizador: "Mariana Silva",
+      tags: ["Aventura", "Suspense"],
+    },
+    {
+      imagem: "https://placehold.co/600x400",
+      titulo: "Caçada Sob a Lua",
+      resumo:
+        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
+      sistema: "D&D 5e",
+      organizador: "Mariana Silva",
+      tags: ["Aventura", "Suspense"],
+    },
+    {
+      imagem: "https://placehold.co/600x400",
+      titulo: "Caçada Sob a Lua",
+      resumo:
+        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
+      sistema: "D&D 5e",
+      organizador: "Mariana Silva",
+      tags: ["Aventura", "Suspense"],
+    },
+    {
+      imagem: "https://placehold.co/600x400",
+      titulo: "Caçada Sob a Lua",
+      resumo:
+        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
+      sistema: "D&D 5e",
+      organizador: "Mariana Silva",
+      tags: ["Aventura", "Suspense"],
+    },
+
+    // ...mais mesas
+  ];
 
   return (
     <div className="flex min-h-screen bg-gray-900">
@@ -139,6 +189,11 @@ export default function Home() {
               Mesas recentes
             </h2>
             <NewTableCardGrid tables={recentTables} />
+          </section>
+
+          <section>
+            <h1 className="text-2xl font-bold mb-4">Mesas em Destaque</h1>
+            <TableCarousel tables={mesas} />
           </section>
 
           {/* Outros conteúdos */}
