@@ -6,7 +6,10 @@ interface SummaryTableCardProps {
   resumo: string;
   sistema: string;
   organizador: string;
-  tags: string[];
+  tags: {
+    id: number;
+    nome: string;
+  };
 }
 
 export const SummaryTableCard: React.FC<SummaryTableCardProps> = (
@@ -52,9 +55,9 @@ export const SummaryTableCard: React.FC<SummaryTableCardProps> = (
           <div className="absolute flex gap-2 z-20">
             {tags.map((tag) => (
               <span
-                key={tag}
+                key={tag.id}
                 className="px-2 py-0.5 text-xs bg-gray-700 text-white rounded"
-              > {tag}
+              > {tag.nome}
               </span>
             ))}
           </div>

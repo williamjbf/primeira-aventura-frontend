@@ -4,9 +4,8 @@ import Sidebar from "@/components/components/Sidebar/Sidebar";
 import {useEffect, useState} from "react";
 import NewTableCardGrid from "@/components/components/Table/NewTableCardGrid";
 import Topbar from "@/components/components/Topbar/Topbar";
+import {ApiTable, buscarTables, getRecentTables} from "@/services/table";
 import {TableCarousel} from "@/components/components/Table/TableCarousel";
-import {apiFetch} from "@/services/api";
-import {ApiTable, getRecentTables} from "@/services/table";
 
 function getTimeAgo(dateString: string): string {
   const now = new Date();
@@ -29,6 +28,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mesas, setMesas] = useState<ApiTable[]>([]);
   const [recentTables, setRecentTables] = useState<
     {
       imageUrl: string;
@@ -69,93 +69,83 @@ export default function Home() {
       } finally {
         setLoading(false);
       }
+
+      try {
+        const data: ApiTable[] = await buscarTables({
+          titulo: "",
+          sistema: "",
+          tags: [],
+          usuario: "",
+        });
+        if (!mounted) return;
+        console.log(data);
+        setMesas(data);
+        console.log(mesas);
+      } catch (err: any) {
+        console.error("Erro ao buscar mesas recentes:", err);
+        setError(err?.general || err?.message || "Erro ao carregar mesas recentes");
+      }
+
     })();
     return () => {
       mounted = false;
     };
   }, []);
 
-  const mesas = [
-    {
-      imagem: "https://placehold.co/600x400",
-      titulo: "A Sombra de Eldoria",
-      resumo:
-        "Em um reino antigo, forças sombrias ameaçam devorar tudo. Os jogadores devem investigar as ruínas e sobreviver a horrores indescritíveis...",
-      sistema: "Tormenta20",
-      organizador: "Carlos Andrade",
-      tags: ["Terror", "Fantasia", "Investigação"],
-    },
-    {
-      imagem: "https://placehold.co/600x400",
-      titulo: "Caçada Sob a Lua",
-      resumo:
-        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
-      sistema: "D&D 5e",
-      organizador: "Mariana Silva",
-      tags: ["Aventura", "Suspense"],
-    },
-    {
-      imagem: "https://placehold.co/600x400",
-      titulo: "Caçada Sob a Lua",
-      resumo:
-        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
-      sistema: "D&D 5e",
-      organizador: "Mariana Silva",
-      tags: ["Aventura", "Suspense"],
-    },
-    {
-      imagem: "https://placehold.co/600x400",
-      titulo: "Caçada Sob a Lua",
-      resumo:
-        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
-      sistema: "D&D 5e",
-      organizador: "Mariana Silva",
-      tags: ["Aventura", "Suspense"],
-    },
-    {
-      imagem: "https://placehold.co/600x400",
-      titulo: "Caçada Sob a Lua",
-      resumo:
-        "Os jogadores assumem papéis de caçadores e presas, enquanto a lua cheia traz criaturas indescritíveis à vida.",
-      sistema: "D&D 5e",
-      organizador: "Mariana Silva",
-      tags: ["Aventura", "Suspense"],
-    },
-
-    // ...mais mesas
-  ];
-
   return (
     <div className="flex min-h-screen bg-gray-900">
-      <Sidebar />
+      <Sidebar/>
 
       <main className={`flex-1 overflow-y-auto bg-gray-900 rounded-l-lg`}>
         {/* Header fixo após a sidebar */}
-        <Topbar scrolled={scrolled} />
+        <Topbar scrolled={scrolled}/>
 
         {/* Espaço para o header fixo */}
         <div className="pt-16 px-6 max-w-7xl mx-auto space-y-10">
-          {/* Bloco Mesas recentes */}
-          <section>
-            <h2 className="text-xl font-bold text-white mb-4">Mesas recentes</h2>
-            {loading && <p className="text-gray-400">Carregando...</p>}
-            {error && <p className="text-red-400">{error}</p>}
-            {!loading && !error && <NewTableCardGrid tables={recentTables} />}
-          </section>
 
-          <section>
-            <h1 className="text-2xl font-bold mb-4">Mesas em Destaque</h1>
-            <TableCarousel tables={mesas} />
-          </section>
-
-          {/* Outros conteúdos */}
           <section>
             <h1 className="text-3xl font-bold">Bem-vindo à Primeira Aventura!</h1>
             <p className="mt-4 text-gray-300">
               Aqui você pode explorar suas campanhas, mesas e muito mais.
             </p>
-            <div style={{ height: "1500px" }} />
           </section>
+
+          {/* Bloco Mesas recentes */}
+          <section>
+            <h2 className="text-xl font-bold text-white mb-4">Mesas recentes</h2>
+            {loading && <p className="text-gray-400">Carregando...</p>}
+            {error && <p className="text-red-400">{error}</p>}
+            {!loading && !error && <NewTableCardGrid tables={recentTables}/>}
+          </section>
+
+          <section className="mt-8 rounded-xl bg-gradient-to-r from-blue-400 via-blue-600 to-blue-800 p-8 shadow-lg text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-white">
+              Crie sua própria aventura!
+            </h2>
+            <p className="mt-2 text-gray-100 text-lg">
+              Reúna seus amigos, escolha um sistema e dê vida às suas histórias.
+            </p>
+            <button
+              onClick={() => {
+                // Redireciona para a página de criar mesa
+                window.location.href = "/mesas/criar";
+              }}
+              className="mt-4 px-6 py-3 rounded-lg bg-gray-100 text-gray-900 font-semibold hover:bg-gray-300 transition-colors"
+            >
+              Criar Mesa
+            </button>
+          </section>
+
+          <section className="mt-6">
+            {/* Evite envolver o carrossel em contêiner com overflow/absolute custom que interfira */}
+            <TableCarousel tables={mesas}/>
+          </section>
+
+
+          {/* Outros conteúdos */}
+
+          <div style={{height: "1500px"}}/>
+
         </div>
       </main>
     </div>

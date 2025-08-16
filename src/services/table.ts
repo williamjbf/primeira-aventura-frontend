@@ -16,3 +16,17 @@ export async function getRecentTables(): Promise<ApiTable[]> {
     method: "GET",
   });
 }
+
+export interface TableSearchFilters {
+  titulo?: string;
+  sistema?: string;
+  tags?: string[];
+  usuario?: string;
+}
+
+export async function buscarTables(filtros: TableSearchFilters): Promise<ApiTable[]> {
+  return apiFetch<ApiTable[]>(`/tables/buscar`, {
+    method: "POST",
+    body: JSON.stringify(filtros),
+  });
+}
