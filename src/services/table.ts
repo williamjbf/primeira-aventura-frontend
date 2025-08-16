@@ -6,7 +6,7 @@ export interface ApiTable {
   titulo: string;
   resumo: string;
   sistema: string;
-  mestreNome: string;
+  narrador: string;
   tags: string[];
   createdAt: string;
 }
