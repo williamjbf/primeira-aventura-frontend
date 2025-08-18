@@ -21,6 +21,13 @@ interface RegisterResponse {
   token: string; // ou qualquer resposta que seu backend retorne
 }
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  // outros campos quando tiver
+}
+
 export async function login(data: LoginData): Promise<LoginResponse> {
   return apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
@@ -36,3 +43,16 @@ export async function register(data: RegisterData): Promise<RegisterResponse> {
     credentials: "include",
   });
 }
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const user = await apiFetch<User>("/auth/user", {
+      method: "GET",
+      credentials: "include",
+    });
+    return user;
+  } catch (error: any) {
+    return null; // se der erro, considera que não está logado
+  }
+}
+
