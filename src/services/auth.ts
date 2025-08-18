@@ -25,6 +25,7 @@ export async function login(data: LoginData): Promise<LoginResponse> {
   return apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify(data),
+    credentials: "include",
   });
 }
 
@@ -32,5 +33,6 @@ export async function register(data: RegisterData): Promise<RegisterResponse> {
   return apiFetch<RegisterResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
+    credentials: "include",
   });
 }

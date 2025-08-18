@@ -1,6 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+
   const res = await fetch(`${API_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
@@ -15,7 +16,7 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
     data = await res.json();
   } catch {
     // Se não conseguir fazer parse, dispara erro genérico
-    if (!res.ok) throw { general: "Erro na requisição" };
+    if (!res.ok) throw {general: "Erro na requisição"};
     return {} as T;
   }
 
@@ -25,7 +26,7 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
       throw data.mensagem; // objeto {campo: mensagem}
     }
     // Caso contrário, tenta erro simples
-    throw { general: data.message || "Erro na requisição" };
+    throw {general: data.message || "Erro na requisição"};
   }
 
   return data as T;
