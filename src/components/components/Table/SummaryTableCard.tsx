@@ -9,7 +9,7 @@ interface SummaryTableCardProps {
   tags: {
     id: number;
     nome: string;
-  };
+  }[];
 }
 
 export const SummaryTableCard: React.FC<SummaryTableCardProps> = (

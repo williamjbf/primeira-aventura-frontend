@@ -12,7 +12,7 @@ export default function CreateAdventureSection() {
     if (!user) {
       router.push("/login"); // redireciona para login
     } else {
-      router.push("/create-adventure"); // vai para criar mesa
+      router.push("/table/create"); // vai para criar mesa
     }
   };
 

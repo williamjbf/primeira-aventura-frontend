@@ -12,10 +12,10 @@ const Topbar : React.FC<TopbarProps> = ({ scrolled }: { scrolled: boolean }) => 
     <header
       className={`fixed top-0 z-30 transition-border duration-300 ${
         scrolled ? "bg-gray-900 border-b border-gray-700" : ""
-      } ml-64 w-full`}
+      } w-full`}
     >
       <div className="flex items-center justify-end h-12 px-6 gap-4 max-w-7xl mx-auto">
-        <div className="relative w-48">
+        <div className="relative">
           <input
             type="search"
             placeholder="Search"

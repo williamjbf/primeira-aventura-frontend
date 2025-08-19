@@ -25,10 +25,10 @@ export default function Home() {
     <div className="flex min-h-screen bg-gray-900">
       <Sidebar/>
 
-      <main className={`flex-1 overflow-y-auto bg-gray-900 rounded-l-lg`}>
+      <main className={`flex-1 overflow-y-auto ml-64 bg-gray-900 rounded-l-lg`}>
 
         {/* Hero com imagem + gradient */}
-        <div className="relative ml-64 h-[400px] w-full-64">
+        <div className="relative h-[400px] w-full-64">
           <div
             className="absolute inset-0 bg-cover bg-top"
             style={{backgroundImage: "url('/banner.jpeg')"}}
