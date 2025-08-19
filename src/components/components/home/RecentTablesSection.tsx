@@ -33,6 +33,7 @@ export default function RecentTablesSection() {
         const data = await getRecentTables();
         if (!mounted) return;
         const mapped = data.slice(0, 16).map((mesa: ApiTable) => ({
+          id: mesa.id,
           imageUrl: mesa.imagem,
           title: mesa.titulo,
           system: mesa.sistema,

@@ -6,9 +6,14 @@ export interface ApiTable {
   titulo: string;
   resumo: string;
   sistema: string;
-  narrador: string;
-  tags: tag[];
+  narrador: Narrador;
+  tags: Tag[];
   createdAt: string;
+}
+
+export interface Narrador {
+  id: string;
+  nome: string;
 }
 
 export interface CreateTableRequest {
@@ -20,7 +25,7 @@ export interface CreateTableRequest {
   idTags: number[];
 }
 
-export interface tag{
+export interface Tag {
   id: number;
   nome: string;
 }
@@ -52,4 +57,11 @@ export async function criarMesa(data: CreateTableRequest): Promise<ApiTable> {
     body: JSON.stringify(data),
     credentials: "include",
   });
+}
+
+export async function buscarMesaPorId(id: string): Promise<ApiTable> {
+  return apiFetch<ApiTable>(`/tables/${id}`, {
+    method: "GET",
+    credentials: "include",
+  })
 }

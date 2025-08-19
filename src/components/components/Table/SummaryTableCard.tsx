@@ -1,11 +1,12 @@
 import Image from "next/image";
+import {Narrador} from "@/services/table";
 
 interface SummaryTableCardProps {
   imagem: string;
   titulo: string;
   resumo: string;
   sistema: string;
-  narrador: string;
+  narrador: Narrador;
   tags: {
     id: number;
     nome: string;
@@ -50,7 +51,7 @@ export const SummaryTableCard: React.FC<SummaryTableCardProps> = (
             <span className="font-bold">Sistema:</span> {sistema}
           </div>
           <div>
-            <span className="font-bold">Organizador:</span> {narrador}
+            <span className="font-bold">Organizador:</span> {narrador.nome}
           </div>
           <div className="absolute flex gap-2 z-20">
             {tags.map((tag) => (

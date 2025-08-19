@@ -3,13 +3,16 @@
 import {useKeenSlider} from "keen-slider/react";
 import {useEffect} from "react";
 import {SummaryTableCard} from "@/components/components/Table/SummaryTableCard";
+import Link from "next/link";
+import {Narrador} from "@/services/table";
 
 interface Table {
+  id: string;
   imagem: string;
   titulo: string;
   resumo: string;
   sistema: string;
-  organizador: string;
+  narrador: Narrador;
   tags: string[];
 }
 
@@ -46,7 +49,9 @@ export const TableCarousel: React.FC<TablesCarouselProps> = ({tables}) => {
     <div ref={sliderRef} className="keen-slider">
       {tables.map((mesa, i) => (
         <div key={i} className="keen-slider__slide">
-          <SummaryTableCard {...mesa} />
+          <Link href={`/table/${mesa.id}`}>
+            <SummaryTableCard {...mesa} />
+          </Link>
         </div>
       ))}
     </div>
