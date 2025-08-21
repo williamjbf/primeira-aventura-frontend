@@ -1,20 +1,50 @@
-import {apiFetch, apiFormData} from "./api";
+import {apiFetch} from "./api";
 
 export interface ApiTable {
-  id: string;
-  imagem: any;
+  id: string | number;
   titulo: string;
-  resumo: string;
   sistema: string;
+  resumo: string;
+  imagem: string | File;
+  previewUrl?: string;
+  local?: string;
+  horario?: Horario;
   narrador: Narrador;
   tags: Tag[];
   createdAt: string;
+}
+
+export interface RecentsTables{
+  id: string | number;
+  imagem: string | File;
+  titulo: string;
+  sistema: string;
+  mestreNome: string;
+  createdAt: string;
+}
+
+export interface Horario {
+  dia: string;
+  hora: string
+}
+
+export interface Tag {
+  id: number;
+  nome: string;
 }
 
 export interface Narrador {
   id: string;
   nome: string;
 }
+
+export interface TableSearchFilters {
+  titulo?: string;
+  sistema?: string;
+  tags?: string[];
+  usuario?: string;
+}
+
 
 export interface CreateTableRequest {
   nome: string;
@@ -40,51 +70,74 @@ export interface SaveTableRequest {
   };
 }
 
-export interface Tag {
-  id: number;
-  nome: string;
+function parseHorario(input: unknown): Horario | undefined {
+  if (input == null) return undefined;
+
+  let value: any = input;
+  if (typeof input === "string") {
+    try {
+      value = JSON.parse(input);
+    } catch {
+      return undefined;
+    }
+  }
+  if (
+    value &&
+    typeof value === "object" &&
+    typeof value.dia === "string" &&
+    typeof value.hora === "string"
+  ) {
+    return { dia: value.dia, hora: value.hora };
+  }
+  return undefined;
 }
 
-export async function getRecentTables(): Promise<ApiTable[]> {
-  return apiFetch<ApiTable[]>(`/tables/recentes`, {
+function normalizeApiTable<T extends { horario?: unknown }>(t: T): T & { horario?: Horario } {
+  return { ...t, horario: parseHorario(t.horario) };
+}
+
+export async function getRecentTables(): Promise<RecentsTables[]> {
+  return apiFetch<RecentsTables[]>(`/tables/recentes`, {
     method: "GET",
   });
 }
 
-export interface TableSearchFilters {
-  titulo?: string;
-  sistema?: string;
-  tags?: string[];
-  usuario?: string;
-}
-
 export async function buscarTables(filtros: TableSearchFilters): Promise<ApiTable[]> {
-  return apiFetch<ApiTable[]>(`/tables/buscar`, {
+  const response = await apiFetch<ApiTable[]>(`/tables/buscar`, {
     method: "POST",
     body: JSON.stringify(filtros),
     credentials: "include",
   });
+  return response.map((t) => normalizeApiTable(t));
 }
 
 export async function criarMesa(data: CreateTableRequest): Promise<ApiTable> {
-  return apiFetch<ApiTable>("/tables", {
+  const response = await apiFetch<ApiTable>("/tables", {
     method: "POST",
     body: JSON.stringify(data),
     credentials: "include",
   });
+  return normalizeApiTable(response);
 }
 
 export async function buscarMesaPorId(id: string): Promise<ApiTable> {
-  return apiFetch<ApiTable>(`/tables/${id}`, {
+  const response = await apiFetch<ApiTable>(`/tables/${id}`, {
     method: "GET",
     credentials: "include",
   });
+  return normalizeApiTable(response);
 }
 
-export async function salvarMesa(formData: FormData) {
-  return fetch("http://localhost:8080/api/tables/save", {
+export async function salvarMesa(formData: FormData): Promise<ApiTable> {
+  const res = await fetch("http://localhost:8080/api/tables/save", {
     method: "POST",
     body: formData,
     credentials: "include",
   });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Falha ao salvar mesa (${res.status})`);
+  }
+  const data = await res.json();
+  return normalizeApiTable(data);
 }

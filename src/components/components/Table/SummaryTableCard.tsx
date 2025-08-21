@@ -26,7 +26,7 @@ export const SummaryTableCard: React.FC<SummaryTableCardProps> = (
     <div className="relative w-64 h-80 rounded-xl overflow-hidden shadow-lg group snap-start">
       {/* Imagem */}
       <Image
-        src={imagem}
+        src={`http://localhost:8080${imagem}` || "https://placehold.co/600x400"}
         alt={titulo}
         fill
         unoptimized
@@ -53,14 +53,22 @@ export const SummaryTableCard: React.FC<SummaryTableCardProps> = (
           <div>
             <span className="font-bold">Organizador:</span> {narrador.nome}
           </div>
-          <div className="absolute flex gap-2 z-20">
-            {tags.map((tag) => (
+          <div className="absolute flex flex-wrap gap-2 z-20">
+            {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag.id}
-                className="px-2 py-0.5 text-xs bg-gray-700 text-white rounded"
-              > {tag.nome}
+                className="px-2 py-0.5 text-xs bg-gray-700 text-white rounded-full"
+              >
+              {tag.nome}
               </span>
             ))}
+
+            {/* Exibe "..." se tiver mais do que 3 */}
+            {tags.length > 3 && (
+              <span className="px-2 py-0.5 text-xs bg-gray-600 text-white rounded-full">
+                +{tags.length - 3}
+              </span>
+            )}
           </div>
         </div>
       </div>

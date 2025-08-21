@@ -2,7 +2,7 @@
 
 import NewTableCardGrid from "@/components/components/Table/NewTableCardGrid";
 import {useEffect, useState} from "react";
-import {ApiTable, getRecentTables} from "@/services/table";
+import {ApiTable, getRecentTables, RecentsTables} from "@/services/table";
 
 
 function getTimeAgo(dateString: string): string {
@@ -32,7 +32,7 @@ export default function RecentTablesSection() {
       try {
         const data = await getRecentTables();
         if (!mounted) return;
-        const mapped = data.slice(0, 16).map((mesa: ApiTable) => ({
+        const mapped = data.slice(0, 16).map((mesa: RecentsTables) => ({
           id: mesa.id,
           imageUrl: mesa.imagem,
           title: mesa.titulo,

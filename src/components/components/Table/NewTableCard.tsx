@@ -30,7 +30,7 @@ const NewTableCard: React.FC<TableCardProps> = ({
       {/* Thumbnail */}
       <div className="relative h-14 w-10 flex-shrink-0">
         <Image
-          src={imageUrl}
+          src={`http://localhost:8080${imageUrl}` || "https://placehold.co/600x400"}
           alt={`${title} thumbnail`}
           unoptimized
           fill
