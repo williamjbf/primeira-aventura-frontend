@@ -33,7 +33,7 @@ export default function LoginForm() {
     try {
       const data = await login(formData);
       localStorage.setItem("token", data.token);
-      router.push("/");
+      router.push("/post-login");
     } catch (err: any) {
       // espera que o erro seja um objeto com mensagem { auth: "..." }
       if (err && typeof err === "object" && err.auth) {

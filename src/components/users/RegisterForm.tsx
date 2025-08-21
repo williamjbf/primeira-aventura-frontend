@@ -58,7 +58,7 @@ export default function RegisterForm() {
         password: formData.password,
       });
 
-      router.push("/");
+      router.push("/post-login");
     } catch (err: any) {
       // se for um objeto de erros de campo (ex.: { email: "erro", password: "erro" })
       if (err && typeof err === "object" && !Array.isArray(err)) {
