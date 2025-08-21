@@ -50,6 +50,7 @@ export async function getCurrentUser(): Promise<User | null> {
       method: "GET",
       credentials: "include",
     });
+    console.log("User:", user);
     return user;
   } catch (error: any) {
     return null; // se der erro, considera que não está logado

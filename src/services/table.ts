@@ -1,8 +1,8 @@
-import { apiFetch } from "./api";
+import {apiFetch, apiFormData} from "./api";
 
 export interface ApiTable {
   id: string;
-  imagem: string;
+  imagem: any;
   titulo: string;
   resumo: string;
   sistema: string;
@@ -23,6 +23,21 @@ export interface CreateTableRequest {
   imagem: string;
   idNarrador: number;
   idTags: number[];
+}
+
+export interface SaveTableRequest {
+  id?: number;
+  titulo: string;
+  imagem: string;
+  sistema: string;
+  resumo: string;
+  narradorId: number;
+  tags: number[];
+  local?: string;
+  horario?: {
+    dia: string;
+    hora: string;
+  };
 }
 
 export interface Tag {
@@ -63,5 +78,13 @@ export async function buscarMesaPorId(id: string): Promise<ApiTable> {
   return apiFetch<ApiTable>(`/tables/${id}`, {
     method: "GET",
     credentials: "include",
-  })
+  });
+}
+
+export async function salvarMesa(formData: FormData) {
+  return fetch("http://localhost:8080/api/tables/save", {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
 }
