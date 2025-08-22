@@ -1,24 +1,55 @@
 'use client'
 
 import { FaChevronDown } from "react-icons/fa";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 
-interface SidebarExpandableItemProps {
+type Key = string | number;
+
+interface SidebarExpandableItemProps<T = unknown> {
   icon: React.ReactNode;
   label: string;
-  items: string[];
+  items: T[];
   maxVisible?: number;
+  // Mapeadores para manter compatibilidade e flexibilidade
+  getItemId?: (item: T, index: number) => Key;
+  getItemLabel?: (item: T, index: number) => string;
+  onItemClick?: (id: Key, item: T) => void;
 }
 
-const SidebarExpandableItem: React.FC<SidebarExpandableItemProps> = ({
-                                                                       icon,
-                                                                       label,
-                                                                       items,
-                                                                       maxVisible = 5,
-                                                                     }) => {
+const SidebarExpandableItem = <T,>({
+  icon,
+  label,
+  items,
+  maxVisible = 5,
+  getItemId,
+  getItemLabel,
+  onItemClick,
+}: SidebarExpandableItemProps<T>) => {
   const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
-  const visibleItems = open ? items.slice(0, maxVisible) : [];
+  const resolvedGetItemId = useMemo(
+    () =>
+      getItemId ||
+      ((item: any, index: number) =>
+        item?.id ?? `${label}-${index}`),
+    [getItemId, label]
+  );
+
+  const resolvedGetItemLabel = useMemo(
+    () =>
+      getItemLabel ||
+      ((item: any) =>
+        typeof item === "string" ? item : item?.titulo ?? String(item)),
+    [getItemLabel]
+  );
+
+  const visibleItems = useMemo(() => {
+    if (!open) return [];
+    return showAll ? items : items.slice(0, maxVisible);
+  }, [open, showAll, items, maxVisible]);
+
+  const listId = `${label.replace(/\s+/g, "-").toLowerCase()}-list`;
 
   return (
     <div>
@@ -26,7 +57,7 @@ const SidebarExpandableItem: React.FC<SidebarExpandableItemProps> = ({
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center justify-between w-full px-3 py-2 hover:bg-gray-800 rounded text-white"
         aria-expanded={open}
-        aria-controls={`${label.replace(/\s+/g, "-").toLowerCase()}-list`}
+        aria-controls={listId}
       >
         <span className="flex items-center gap-3">
           {icon}
@@ -37,23 +68,33 @@ const SidebarExpandableItem: React.FC<SidebarExpandableItemProps> = ({
 
       {open && (
         <ul
-          id={`${label.replace(/\s+/g, "-").toLowerCase()}-list`}
+          id={listId}
           className="ml-6 mt-1 space-y-1 max-h-48 overflow-y-auto pr-1"
         >
-          {visibleItems.map((item, index) => (
-            <li
-              key={index}
-              className="text-sm text-gray-300 hover:text-white cursor-pointer"
-              tabIndex={0}
-              role="button"
-            >
-              {item}
-            </li>
-          ))}
+          {visibleItems.map((item, index) => {
+            const id = resolvedGetItemId(item, index);
+            const text = resolvedGetItemLabel(item, index);
+            return (
+              <li
+                key={id}
+                className="text-sm text-gray-300 hover:text-white cursor-pointer"
+                tabIndex={0}
+                role="button"
+                onClick={() => onItemClick?.(id, item)}
+                title={text}
+              >
+                {text}
+              </li>
+            );
+          })}
 
           {items.length > maxVisible && (
-            <li className="text-sm text-blue-400 hover:underline cursor-pointer" tabIndex={0}>
-              + Ver Mais
+            <li
+              className="text-sm text-blue-400 hover:underline cursor-pointer"
+              tabIndex={0}
+              onClick={() => setShowAll((s) => !s)}
+            >
+              {showAll ? "Ver menos" : `+ Ver mais`}
             </li>
           )}
         </ul>

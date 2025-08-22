@@ -70,6 +70,11 @@ export interface SaveTableRequest {
   };
 }
 
+export interface TableList {
+  id: string,
+  titulo: string
+}
+
 function parseHorario(input: unknown): Horario | undefined {
   if (input == null) return undefined;
 
@@ -126,6 +131,27 @@ export async function buscarMesaPorId(id: string): Promise<ApiTable> {
     credentials: "include",
   });
   return normalizeApiTable(response);
+}
+
+export async function buscarMesasDoDono(idUsuario: string | number): Promise<TableList[]> {
+  return apiFetch<TableList[]>(`/tables/owner/${idUsuario}`, {
+    method: "GET",
+    credentials: "include",
+  });
+}
+
+export async function buscarMesasInscritas(idUsuario: string | number): Promise<TableList[]> {
+  return apiFetch<TableList[]>(`/tables/participate/${idUsuario}`, {
+    method: "GET",
+    credentials: "include",
+  });
+}
+
+export async function buscarMesasPendentes(idUsuario: string | number): Promise<TableList[]> {
+  return apiFetch<TableList[]>(`/tables/pending/${idUsuario}`, {
+    method: "GET",
+    credentials: "include",
+  });
 }
 
 export async function salvarMesa(formData: FormData): Promise<ApiTable> {
