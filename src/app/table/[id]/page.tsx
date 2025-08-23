@@ -12,6 +12,7 @@ import TableHero from "@/components/components/Table/TableHero ";
 import TableInfo from "@/components/components/Table/TableInfo";
 import TableHistorico from "@/components/components/Table/TableHistorico";
 import {useUserTables} from "@/contexts/UserTablesContext";
+import ManageSubscriptionsModal from "@/components/components/Table/ManageSubscriptionsModal";
 
 interface MesaDetalhes extends ApiTable {
   historico: { id: number; titulo: string; data: string }[];
@@ -40,6 +41,7 @@ export default function TableDetailsPage() {
   const {id} = useParams<{ id: string }>();
   const {mesasInscritas, mesasPendentes, mesasNegadas, loading: loadingUserTables, refresh} = useUserTables();
   const [subscribing, setSubscribing] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
 
   useEffect(() => {
     const fetchMesa = async () => {
@@ -168,12 +170,20 @@ export default function TableDetailsPage() {
           </button>
         </div>
       ) : (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="px-6 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-500"
-        >
-          Editar
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="px-6 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-500"
+          >
+            Editar
+          </button>
+          <button
+            onClick={() => setManageOpen(true)}
+            className="px-6 py-2 bg-indigo-700 rounded-lg text-white hover:bg-indigo-600"
+          >
+            Gerenciar inscrições
+          </button>
+        </div>
       );
     }
     const disabled = subscribing || loadingUserTables ||estaPendente || estaInscrito || estaNegado;
@@ -239,6 +249,23 @@ export default function TableDetailsPage() {
           </section>
         </div>
       </main>
+
+      {/* Modal centralizada no novo componente */}
+      {user?.id === mesa.narrador.id && (
+        <ManageSubscriptionsModal
+          open={manageOpen}
+          tableId={mesa.id}
+          onClose={() => setManageOpen(false)}
+          onSaved={async () => {
+            // Atualiza contexto/global após salvar
+            try {
+              await refresh();
+            } catch (e) {
+              console.error("Falha ao atualizar listas do usuário após salvar inscrições:", e);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

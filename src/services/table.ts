@@ -87,6 +87,23 @@ export interface SubscribeResponse {
   "status": string
 }
 
+export interface SubscriptionUser {
+  id: number;
+  userId: number;
+  username: string;
+}
+
+export interface SubscriptionResponse {
+  accepted: SubscriptionUser[];
+  denied: SubscriptionUser[];
+  pending: SubscriptionUser[];
+}
+
+export interface SubscribeBulkUpdateRequest {
+  "ids": string[] | number[],
+  "status": string
+}
+
 function parseHorario(input: unknown): Horario | undefined {
   if (input == null) return undefined;
 
@@ -166,6 +183,22 @@ export async function buscarMesasNegadas(idUsuario: string | number): Promise<Ta
 
 export async function inscreverMesa(data: SubscribeRequest): Promise<SubscribeResponse> {
   return apiFetch<SubscribeResponse>(`/tables/subscribe`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    credentials: "include",
+  })
+}
+
+export async function buscarInscricoes(idMesa: string | number): Promise<SubscriptionResponse> {
+  return apiFetch<SubscriptionResponse>(`/tables/${idMesa}/subscriptions`, {
+    method: "GET",
+    credentials: "include",
+    }
+  )
+}
+
+export async function atualizarMultiplasInscricoes(data: SubscribeBulkUpdateRequest): Promise<SubscribeResponse[]> {
+  return apiFetch<SubscribeResponse[]>(`/tables/subscribe/status/batch`, {
     method: "POST",
     body: JSON.stringify(data),
     credentials: "include",
