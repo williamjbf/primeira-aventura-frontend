@@ -14,7 +14,7 @@ export interface ApiTable {
   createdAt: string;
 }
 
-export interface RecentsTables{
+export interface RecentsTables {
   id: string | number;
   imagem: string | File;
   titulo: string;
@@ -75,6 +75,18 @@ export interface TableList {
   titulo: string
 }
 
+export interface SubscribeRequest {
+  tableId: number;
+  userId: number;
+}
+
+export interface SubscribeResponse {
+  "id": string | number,
+  "userId": string | number,
+  "tableId": string | number,
+  "status": string
+}
+
 function parseHorario(input: unknown): Horario | undefined {
   if (input == null) return undefined;
 
@@ -92,13 +104,13 @@ function parseHorario(input: unknown): Horario | undefined {
     typeof value.dia === "string" &&
     typeof value.hora === "string"
   ) {
-    return { dia: value.dia, hora: value.hora };
+    return {dia: value.dia, hora: value.hora};
   }
   return undefined;
 }
 
 function normalizeApiTable<T extends { horario?: unknown }>(t: T): T & { horario?: Horario } {
-  return { ...t, horario: parseHorario(t.horario) };
+  return {...t, horario: parseHorario(t.horario)};
 }
 
 export async function getRecentTables(): Promise<RecentsTables[]> {
@@ -114,15 +126,6 @@ export async function buscarTables(filtros: TableSearchFilters): Promise<ApiTabl
     credentials: "include",
   });
   return response.map((t) => normalizeApiTable(t));
-}
-
-export async function criarMesa(data: CreateTableRequest): Promise<ApiTable> {
-  const response = await apiFetch<ApiTable>("/tables", {
-    method: "POST",
-    body: JSON.stringify(data),
-    credentials: "include",
-  });
-  return normalizeApiTable(response);
 }
 
 export async function buscarMesaPorId(id: string): Promise<ApiTable> {
@@ -152,6 +155,21 @@ export async function buscarMesasPendentes(idUsuario: string | number): Promise<
     method: "GET",
     credentials: "include",
   });
+}
+
+export async function buscarMesasNegadas(idUsuario: string | number): Promise<TableList[]> {
+  return apiFetch<TableList[]>(`/tables/denied/${idUsuario}`, {
+    method: "GET",
+    credentials: "include",
+  });
+}
+
+export async function inscreverMesa(data: SubscribeRequest): Promise<SubscribeResponse> {
+  return apiFetch<SubscribeResponse>(`/tables/subscribe`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    credentials: "include",
+  })
 }
 
 export async function salvarMesa(formData: FormData): Promise<ApiTable> {

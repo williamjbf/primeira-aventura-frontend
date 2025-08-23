@@ -4,13 +4,14 @@ import Sidebar from "@/components/components/Sidebar/Sidebar";
 import Topbar from "@/components/components/Topbar/Topbar";
 import {useEffect, useState} from "react";
 import {useParams} from "next/navigation";
-import {ApiTable, buscarMesaPorId, salvarMesa, SaveTableRequest} from "@/services/table";
+import {ApiTable, buscarMesaPorId, inscreverMesa, salvarMesa, SaveTableRequest} from "@/services/table";
 import {useAuth} from "@/contexts/AuthContext";
 import TableOverviewSection from "@/components/components/Table/TableOverviewSection";
 import TableResumo from "@/components/components/Table/TableResumo";
 import TableHero from "@/components/components/Table/TableHero ";
 import TableInfo from "@/components/components/Table/TableInfo";
 import TableHistorico from "@/components/components/Table/TableHistorico";
+import {useUserTables} from "@/contexts/UserTablesContext";
 
 interface MesaDetalhes extends ApiTable {
   historico: { id: number; titulo: string; data: string }[];
@@ -37,6 +38,8 @@ export default function TableDetailsPage() {
   const [loading, setLoading] = useState(false);
   const {user} = useAuth();
   const {id} = useParams<{ id: string }>();
+  const {mesasInscritas, mesasPendentes, mesasNegadas, loading: loadingUserTables, refresh} = useUserTables();
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     const fetchMesa = async () => {
@@ -66,6 +69,12 @@ export default function TableDetailsPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if(user?.id){
+      refresh().catch((e) => console.error("Erro ao atualizar lista do usuário::", e));
+    }
+  }, [user?.id, refresh]);
+
   if (!mesa) {
     return (
       <div className="flex min-h-screen items-center justify-center text-white">
@@ -90,10 +99,6 @@ export default function TableDetailsPage() {
       if (mesa.local) formData.append("local", mesa.local);
       if (mesa.horario) formData.append("horario", JSON.stringify(mesa.horario));
 
-      console.log("HORARIOS AQUI")
-      console.log(JSON.stringify(mesa.horario));
-      console.log(mesa.horario);
-
       if (mesa.imagem instanceof File) {
         formData.append("imagem", mesa.imagem);
       }
@@ -114,6 +119,29 @@ export default function TableDetailsPage() {
   const handleChange = (field: keyof MesaDetalhes, value: any) => {
     setMesa((prev) => (prev ? {...prev, [field]: value} : prev));
   };
+
+  const handleSubscribe = async () => {
+    if (!user?.id || !mesa?.id) return;
+    try {
+      setSubscribing(true);
+      await inscreverMesa({
+        tableId: Number(mesa.id),
+        userId: Number(user.id),
+      });
+      // Atualiza as listas globais (pendentes/inscritas)
+      await refresh();
+    } catch (e) {
+      console.error("Erro ao inscrever na mesa:", e);
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
+  // Estados do botão com base nas listas globais
+  const mesaIdStr = String(mesa.id);
+  const estaPendente = mesasPendentes?.some((m) => String(m.id) === mesaIdStr);
+  const estaInscrito = mesasInscritas?.some((m) => String(m.id) === mesaIdStr);
+  const estaNegado = mesasNegadas?.some((m) => String(m.id) === mesaIdStr);
 
   const renderBotoes = () => {
     if (user?.id === mesa.narrador.id) {
@@ -148,10 +176,31 @@ export default function TableDetailsPage() {
         </button>
       );
     }
+    const disabled = subscribing || loadingUserTables ||estaPendente || estaInscrito || estaNegado;
+    console.log(subscribing, loadingUserTables, estaPendente, estaInscrito);
+    const label = subscribing
+      ? "Enviando inscrição..."
+      : loadingUserTables
+        ? "Carregando..."
+        : estaInscrito
+          ? "Já inscrito"
+          : estaPendente
+            ? "Inscrição pendente"
+            : estaNegado
+              ? "Inscrição negada"
+              : "Inscrever-se";
+
     return (
-      <button className="px-6 py-2 bg-indigo-600 rounded-lg text-white hover:bg-indigo-500">
-        Inscrever-se
+      <button
+        onClick={handleSubscribe}
+        disabled={disabled}
+        className={`px-6 py-2 rounded-lg text-white ${
+          disabled ? "bg-indigo-600/60 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-500"
+        }`}
+      >
+        {label}
       </button>
+
     );
   };
 
@@ -176,7 +225,8 @@ export default function TableDetailsPage() {
             onChange={handleChange as any}
           />
 
-          <TableResumo resumo={mesa.resumo} isEditing={isEditing} onChange={(val) => handleChange("resumo", val as any)}/>
+          <TableResumo resumo={mesa.resumo} isEditing={isEditing}
+                       onChange={(val) => handleChange("resumo", val as any)}/>
 
           {/* Informações adicionais */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8">

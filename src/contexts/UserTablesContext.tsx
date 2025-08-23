@@ -1,13 +1,21 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import {ApiTable, buscarMesasDoDono, buscarMesasInscritas, buscarMesasPendentes, TableList} from "@/services/table";
+import {
+  ApiTable,
+  buscarMesasDoDono,
+  buscarMesasInscritas,
+  buscarMesasNegadas,
+  buscarMesasPendentes,
+  TableList
+} from "@/services/table";
 import { useAuth } from "@/contexts/AuthContext";
 
 type UserTablesContextType = {
   mesasProprias: ApiTable[];
   mesasInscritas: ApiTable[];
   mesasPendentes: ApiTable[];
+  mesasNegadas: ApiTable[];
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -21,6 +29,7 @@ export function UserTablesProvider({ children }: { children: React.ReactNode }) 
   const [mesasProprias, setMesasProprias] = useState<TableList[]>([]);
   const [mesasInscritas, setMesasInscritas] = useState<TableList[]>([]);
   const [mesasPendentes, setMesasPendentes] = useState<TableList[]>([]);
+  const [mesasNegadas, setMesasNegadas] = useState<TableList[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +37,7 @@ export function UserTablesProvider({ children }: { children: React.ReactNode }) 
     setMesasProprias([]);
     setMesasInscritas([]);
     setMesasPendentes([]);
+    setMesasNegadas([]);
     setError(null);
   }, []);
 
@@ -39,14 +49,16 @@ export function UserTablesProvider({ children }: { children: React.ReactNode }) 
     setLoading(true);
     setError(null);
     try {
-      const [proprias, inscritas, pendentes] = await Promise.all([
+      const [proprias, inscritas, pendentes, negadas] = await Promise.all([
         buscarMesasDoDono(user.id),
         buscarMesasInscritas(user.id),
-        buscarMesasPendentes(user.id)
+        buscarMesasPendentes(user.id),
+        buscarMesasNegadas(user.id),
       ]);
       setMesasProprias(proprias);
       setMesasInscritas(inscritas);
       setMesasPendentes(pendentes);
+      setMesasNegadas(negadas)
     } catch (e: any) {
       setError(e?.message || "Falha ao carregar mesas do usuário");
     } finally {
@@ -64,8 +76,8 @@ export function UserTablesProvider({ children }: { children: React.ReactNode }) 
   }, [user?.id, refresh, clear]);
 
   const value = useMemo(
-    () => ({ mesasProprias, mesasInscritas, mesasPendentes, loading, error, refresh, clear }),
-    [mesasProprias, mesasInscritas, mesasPendentes, loading, error, refresh, clear]
+    () => ({ mesasProprias, mesasInscritas, mesasPendentes, mesasNegadas, loading, error, refresh, clear }),
+    [mesasProprias, mesasInscritas, mesasPendentes, mesasNegadas, loading, error, refresh, clear]
   );
 
   return <UserTablesContext.Provider value={value}>{children}</UserTablesContext.Provider>;
