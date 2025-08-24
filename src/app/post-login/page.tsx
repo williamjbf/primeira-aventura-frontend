@@ -7,22 +7,18 @@ import LoadingScreen from "@/components/components/loading/LoadingScreen";
 
 export default function PostLoginPage() {
   const router = useRouter();
-  const { user, fetchUser } = useAuth() as {
-    user: { id?: string } | null;
-    fetchUser?: () => Promise<void>;
-  };
+  const { refreshUser } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
 
     const load = async () => {
       try {
-        // Se o contexto tiver um método para recarregar o usuário, chame aqui
-        if (fetchUser) await fetchUser();
+        await refreshUser();
       } finally {
-        if (!isMounted) return;
-        // Decida o destino após carregar (ex.: /dashboard)
-        router.replace("/");
+        if (isMounted) {
+          router.replace("/");
+        }
       }
     };
 
@@ -30,7 +26,7 @@ export default function PostLoginPage() {
     return () => {
       isMounted = false;
     };
-  }, [fetchUser, router]);
+  }, [refreshUser, router]);
 
   return <LoadingScreen />;
 }

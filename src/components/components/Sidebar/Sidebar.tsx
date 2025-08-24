@@ -9,12 +9,12 @@ import SidebarExpandableItem from "./SidebarExpandableItem";
 import SidebarFooter from "./SidebarFooter";
 import {useRouter} from "next/navigation";
 import Link from "next/link";
-import {useUserTables} from "@/contexts/UserTablesContext";
+import {useAuth} from "@/contexts/AuthContext";
 
 export default function Sidebar() {
 
   const router = useRouter();
-  const {mesasProprias, mesasInscritas, loading} = useUserTables();
+  const {user, loading} = useAuth();
 
   const handleGoHome = () => router.push("/");
 
@@ -22,6 +22,8 @@ export default function Sidebar() {
     router.push(`/table/${id}`);
   };
 
+  const mesasAceitas = user?.subscriptions.acceptedList ?? [];
+  const mesasProprias = user?.ownedTables ?? [];
 
   return (
     <aside className="w-64 h-screen fixed top-0 left-0 bg-gray-950 text-white flex flex-col border-r border-gray-700">
@@ -36,7 +38,7 @@ export default function Sidebar() {
         <SidebarExpandableItem
           icon={<FaDiceD20/>}
           label="Meus Jogos"
-          items={mesasInscritas}
+          items={mesasAceitas}
           maxVisible={5}
           getItemId={(t) => t.id}
           getItemLabel={(t) => t.titulo}

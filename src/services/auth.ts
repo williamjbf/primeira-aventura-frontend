@@ -21,11 +21,21 @@ interface RegisterResponse {
   token: string; // ou qualquer resposta que seu backend retorne
 }
 
+interface TableList {
+  id: string,
+  titulo: string
+}
+
 interface User {
   id: string;
   username: string;
   email: string;
-  // outros campos quando tiver
+  subscriptions: {
+    acceptedList: TableList[],
+    pendingList: TableList[],
+    deniedList: TableList[]
+  },
+  ownedTables: TableList[]
 }
 
 export async function login(data: LoginData): Promise<LoginResponse> {

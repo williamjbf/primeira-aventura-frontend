@@ -4,14 +4,13 @@ import Sidebar from "@/components/components/Sidebar/Sidebar";
 import Topbar from "@/components/components/Topbar/Topbar";
 import {useEffect, useState} from "react";
 import {useParams} from "next/navigation";
-import {ApiTable, buscarMesaPorId, inscreverMesa, salvarMesa, SaveTableRequest} from "@/services/table";
+import {ApiTable, buscarMesaPorId, inscreverMesa, salvarMesa} from "@/services/table";
 import {useAuth} from "@/contexts/AuthContext";
 import TableOverviewSection from "@/components/components/Table/TableOverviewSection";
 import TableResumo from "@/components/components/Table/TableResumo";
 import TableHero from "@/components/components/Table/TableHero ";
 import TableInfo from "@/components/components/Table/TableInfo";
 import TableHistorico from "@/components/components/Table/TableHistorico";
-import {useUserTables} from "@/contexts/UserTablesContext";
 import ManageSubscriptionsModal from "@/components/components/Table/ManageSubscriptionsModal";
 
 interface MesaDetalhes extends ApiTable {
@@ -37,9 +36,8 @@ export default function TableDetailsPage() {
   const [mesa, setMesa] = useState<MesaDetalhes | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {user} = useAuth();
+  const {user, refreshUser, loading: loadingUser} = useAuth();
   const {id} = useParams<{ id: string }>();
-  const {mesasInscritas, mesasPendentes, mesasNegadas, loading: loadingUserTables, refresh} = useUserTables();
   const [subscribing, setSubscribing] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
 
@@ -70,20 +68,6 @@ export default function TableDetailsPage() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    if(user?.id){
-      refresh().catch((e) => console.error("Erro ao atualizar lista do usuário::", e));
-    }
-  }, [user?.id, refresh]);
-
-  if (!mesa) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-white">
-        Carregando mesa...
-      </div>
-    );
-  }
 
   const handleSave = async () => {
     if (!mesa) return;
@@ -130,8 +114,7 @@ export default function TableDetailsPage() {
         tableId: Number(mesa.id),
         userId: Number(user.id),
       });
-      // Atualiza as listas globais (pendentes/inscritas)
-      await refresh();
+      await refreshUser(); // atualiza user com listas novas
     } catch (e) {
       console.error("Erro ao inscrever na mesa:", e);
     } finally {
@@ -139,11 +122,19 @@ export default function TableDetailsPage() {
     }
   };
 
+  if (!mesa) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-white">
+        Carregando mesa...
+      </div>
+    );
+  }
+
   // Estados do botão com base nas listas globais
   const mesaIdStr = String(mesa.id);
-  const estaPendente = mesasPendentes?.some((m) => String(m.id) === mesaIdStr);
-  const estaInscrito = mesasInscritas?.some((m) => String(m.id) === mesaIdStr);
-  const estaNegado = mesasNegadas?.some((m) => String(m.id) === mesaIdStr);
+  const estaPendente = user?.subscriptions.pendingList.some((m) => String(m.id) === mesaIdStr);
+  const estaInscrito = user?.subscriptions.acceptedList.some((m) => String(m.id) === mesaIdStr);
+  const estaNegado = user?.subscriptions.deniedList.some((m) => String(m.id) === mesaIdStr);
 
   const renderBotoes = () => {
     if (user?.id === mesa.narrador.id) {
@@ -186,11 +177,11 @@ export default function TableDetailsPage() {
         </div>
       );
     }
-    const disabled = subscribing || loadingUserTables ||estaPendente || estaInscrito || estaNegado;
-    console.log(subscribing, loadingUserTables, estaPendente, estaInscrito);
+    const disabled = subscribing || loadingUser || estaPendente || estaInscrito || estaNegado;
+
     const label = subscribing
       ? "Enviando inscrição..."
-      : loadingUserTables
+      : loadingUser
         ? "Carregando..."
         : estaInscrito
           ? "Já inscrito"
@@ -259,7 +250,7 @@ export default function TableDetailsPage() {
           onSaved={async () => {
             // Atualiza contexto/global após salvar
             try {
-              await refresh();
+              await refreshUser();
             } catch (e) {
               console.error("Falha ao atualizar listas do usuário após salvar inscrições:", e);
             }
