@@ -46,6 +46,13 @@ export async function login(data: LoginData): Promise<LoginResponse> {
   });
 }
 
+export async function logout(): Promise<void> {
+  return apiFetch<void>("/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
 export async function register(data: RegisterData): Promise<RegisterResponse> {
   return apiFetch<RegisterResponse>("/auth/register", {
     method: "POST",

@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
+import {useEffect} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
+import {useAuth} from "@/contexts/AuthContext";
 import LoadingScreen from "@/components/components/loading/LoadingScreen";
 
 export default function PostLoginPage() {
   const router = useRouter();
-  const { refreshUser } = useAuth();
+  const {refreshUser} = useAuth();
+
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
 
   useEffect(() => {
     let isMounted = true;
@@ -17,7 +20,7 @@ export default function PostLoginPage() {
         await refreshUser();
       } finally {
         if (isMounted) {
-          router.replace("/");
+          router.replace(redirectTo);
         }
       }
     };
@@ -26,7 +29,7 @@ export default function PostLoginPage() {
     return () => {
       isMounted = false;
     };
-  }, [refreshUser, router]);
+  }, [refreshUser, router, redirectTo]);
 
-  return <LoadingScreen />;
+  return <LoadingScreen/>;
 }

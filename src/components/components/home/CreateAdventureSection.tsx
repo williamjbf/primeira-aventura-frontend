@@ -10,7 +10,7 @@ export default function CreateAdventureSection() {
 
   const handleCreateAdventure = () => {
     if (!user) {
-      router.push("/login"); // redireciona para login
+      router.push("/login?redirectTo=/table/create"); // redireciona para login
     } else {
       router.push("/table/create"); // vai para criar mesa
     }

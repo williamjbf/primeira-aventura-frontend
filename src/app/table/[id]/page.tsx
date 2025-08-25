@@ -3,7 +3,7 @@
 import Sidebar from "@/components/components/Sidebar/Sidebar";
 import Topbar from "@/components/components/Topbar/Topbar";
 import {useEffect, useState} from "react";
-import {useParams} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import {ApiTable, buscarMesaPorId, inscreverMesa, salvarMesa} from "@/services/table";
 import {useAuth} from "@/contexts/AuthContext";
 import TableOverviewSection from "@/components/components/Table/TableOverviewSection";
@@ -38,6 +38,7 @@ export default function TableDetailsPage() {
   const [loading, setLoading] = useState(false);
   const {user, refreshUser, loading: loadingUser} = useAuth();
   const {id} = useParams<{ id: string }>();
+  const router = useRouter();
   const [subscribing, setSubscribing] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
 
@@ -107,6 +108,12 @@ export default function TableDetailsPage() {
   };
 
   const handleSubscribe = async () => {
+
+    if (!user) {
+      router.push(`/login?redirectTo=/table/${mesa.id}`);// redireciona para tela de login
+      return;
+    }
+
     if (!user?.id || !mesa?.id) return;
     try {
       setSubscribing(true);

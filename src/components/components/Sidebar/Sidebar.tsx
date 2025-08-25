@@ -6,7 +6,6 @@ import {FaDiceD20, FaDungeon, FaHome} from "react-icons/fa";
 import SidebarLogo from "./SidebarLogo";
 import SidebarItem from "./SidebarItem";
 import SidebarExpandableItem from "./SidebarExpandableItem";
-import SidebarFooter from "./SidebarFooter";
 import {useRouter} from "next/navigation";
 import Link from "next/link";
 import {useAuth} from "@/contexts/AuthContext";
@@ -59,7 +58,7 @@ export default function Sidebar() {
         )}
       </nav>
 
-      <SidebarFooter/>
+      {/*<SidebarFooter/>*/}
     </aside>
   );
 };

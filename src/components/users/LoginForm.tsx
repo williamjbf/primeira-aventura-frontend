@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { login } from "@/services/auth";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import PasswordField from "@/components/forms/PasswordField";
 
 export default function LoginForm() {
@@ -15,6 +15,9 @@ export default function LoginForm() {
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,7 +36,7 @@ export default function LoginForm() {
     try {
       const data = await login(formData);
       localStorage.setItem("token", data.token);
-      router.push("/post-login");
+      router.push(`/post-login?redirectTo=${encodeURIComponent(redirectTo)}`);
     } catch (err: any) {
       // espera que o erro seja um objeto com mensagem { auth: "..." }
       if (err && typeof err === "object" && err.auth) {

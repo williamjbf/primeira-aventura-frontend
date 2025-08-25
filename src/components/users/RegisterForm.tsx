@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { register } from "@/services/auth";
-import { useRouter } from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import PasswordField from "@/components/forms/PasswordField";
 
 export default function RegisterForm() {
@@ -18,10 +18,8 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  interface PasswordFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    label: string;
-    error?: string;
-  }
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,7 +56,7 @@ export default function RegisterForm() {
         password: formData.password,
       });
 
-      router.push("/post-login");
+      router.push(`/post-login?redirectTo=${encodeURIComponent(redirectTo)}`);
     } catch (err: any) {
       // se for um objeto de erros de campo (ex.: { email: "erro", password: "erro" })
       if (err && typeof err === "object" && !Array.isArray(err)) {

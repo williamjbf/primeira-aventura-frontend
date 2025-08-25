@@ -1,6 +1,6 @@
 "use client";
 import {createContext, useCallback, useContext, useEffect, useState} from "react";
-import { getCurrentUser } from "@/services/auth";
+import {getCurrentUser, logout} from "@/services/auth";
 
 interface TableList {
   id: string;
@@ -23,15 +23,19 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   refreshUser: () => Promise<void>;
+  logoutUser: () => void,
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  refreshUser: async () => {},
+  refreshUser: async () => {
+  },
+  logoutUser: () => {
+  },
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({children}: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,12 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
 
+  const logoutUser = useCallback(() => {
+    logout();
+    setUser(null);
+  }, []);
+
   useEffect(() => {
     refreshUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, refreshUser }}>
+    <AuthContext.Provider value={{user, loading, refreshUser, logoutUser}}>
       {children}
     </AuthContext.Provider>
   );
