@@ -4,7 +4,7 @@ import Sidebar from "@/components/components/Sidebar/Sidebar";
 import Topbar from "@/components/components/Topbar/Topbar";
 import {useEffect, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
-import {ApiTable, buscarMesaPorId, inscreverMesa, salvarMesa} from "@/services/table";
+import {ApiTable, buscarMesaPorId, inscreverMesa, salvarMesa, Tag} from "@/services/table";
 import {useAuth} from "@/contexts/AuthContext";
 import TableOverviewSection from "@/components/components/Table/TableOverviewSection";
 import TableResumo from "@/components/components/Table/TableResumo";
@@ -12,24 +12,12 @@ import TableHero from "@/components/components/Table/TableHero ";
 import TableInfo from "@/components/components/Table/TableInfo";
 import TableHistorico from "@/components/components/Table/TableHistorico";
 import ManageSubscriptionsModal from "@/components/components/Table/ManageSubscriptionsModal";
+import {getAllTags} from "@/services/tag";
 
 interface MesaDetalhes extends ApiTable {
   historico: { id: number; titulo: string; data: string }[];
   previewUrl?: string;
 }
-
-const tagsMock = [
-  {id: 1, nome: "Fantasia"},
-  {id: 2, nome: "Terror"},
-  {id: 3, nome: "Sci-Fi"},
-  {id: 4, nome: "Suspense"},
-  {id: 5, nome: "Aventura"},
-  {id: 6, nome: "Comédia"},
-  {id: 7, nome: "Mistério"},
-  {id: 8, nome: "Drama"},
-  {id: 9, nome: "Cyberpunk"},
-  {id: 10, nome: "Steampunk"}
-]
 
 export default function TableDetailsPage() {
   const [scrolled, setScrolled] = useState(false);
@@ -41,6 +29,7 @@ export default function TableDetailsPage() {
   const router = useRouter();
   const [subscribing, setSubscribing] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
 
   useEffect(() => {
     const fetchMesa = async () => {
@@ -63,6 +52,17 @@ export default function TableDetailsPage() {
 
     if (id) fetchMesa();
   }, [id]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const tags = await getAllTags();
+        setAllTags(tags);
+      } catch (err) {
+        console.error("Erro ao carregar tags:", err);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -228,7 +228,7 @@ export default function TableDetailsPage() {
           <TableOverviewSection
             mesa={mesa as any}
             isEditing={isEditing}
-            availableTags={tagsMock}
+            availableTags={allTags}
             renderActions={renderBotoes()}
             onChange={handleChange as any}
           />

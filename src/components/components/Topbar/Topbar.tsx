@@ -13,6 +13,7 @@ interface TopbarProps {
 const Topbar: React.FC<TopbarProps> = ({scrolled}: { scrolled: boolean }) => {
 
   const {user, logoutUser} = useAuth();
+  const [search, setSearch] = useState("");
   const router = useRouter();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,6 +21,12 @@ const Topbar: React.FC<TopbarProps> = ({scrolled}: { scrolled: boolean }) => {
 
   const handleUserClick = () => {
     setMenuOpen((prev) => !prev);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+    router.push(`/table/search?q=${encodeURIComponent(search)}`);
   };
 
   const handleLogin = () => {
@@ -40,14 +47,18 @@ const Topbar: React.FC<TopbarProps> = ({scrolled}: { scrolled: boolean }) => {
       } w-full`}
     >
       <div className="flex items-center justify-end h-12 px-6 gap-4 max-w-7xl mx-auto">
-        <div className="relative">
+        <form onSubmit={handleSearch} className="relative">
           <input
             type="search"
             placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 rounded bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
-          <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500"/>
-        </div>
+          <button type="submit">
+            <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+          </button>
+        </form>
 
         {/* User Menu */}
         <div className="relative" ref={menuRef}>

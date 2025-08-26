@@ -13,6 +13,7 @@ import TableResumo from "@/components/components/Table/TableResumo";
 import TableInfo from "@/components/components/Table/TableInfo";
 import {Router} from "next/router";
 import {useRouter} from "next/navigation";
+import {getAllTags} from "@/services/tag";
 type Tag = { id: number; nome: string };
 type Narrador = { id: string; nome: string };
 
@@ -30,7 +31,7 @@ interface MesaCadastro {
   historico: { id: number; titulo: string; data: string }[];
 }
 
-const tagsMock: Tag[] = [
+const allTags: Tag[] = [
   { id: 1, nome: "Fantasia" },
   { id: 2, nome: "Terror" },
   { id: 3, nome: "Sci-Fi" },
@@ -48,6 +49,7 @@ export default function TableCreatePage() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
   const [mesa, setMesa] = useState<MesaCadastro>(() => ({
     titulo: "",
     sistema: "",
@@ -69,6 +71,17 @@ export default function TableCreatePage() {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const tags = await getAllTags();
+        setAllTags(tags);
+      } catch (err) {
+        console.error("Erro ao carregar tags:", err);
+      }
+    })();
   }, []);
 
   // Garante que, se o usuário logar depois, atualizamos o narrador
@@ -155,7 +168,7 @@ export default function TableCreatePage() {
           <TableOverviewSection
             mesa={mesa as any}
             isEditing={true}
-            availableTags={tagsMock}
+            availableTags={allTags}
             renderActions={renderActions}
             onChange={handleChange as any}
             // Para imagem local, não precisamos de imageBaseUrl

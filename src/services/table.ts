@@ -145,6 +145,15 @@ export async function buscarTables(filtros: TableSearchFilters): Promise<ApiTabl
   return response.map((t) => normalizeApiTable(t));
 }
 
+export async function buscarTablesAvancado(filtros: TableSearchFilters): Promise<ApiTable[]> {
+  const response = await apiFetch<ApiTable[]>(`/tables/buscar-avancado`, {
+    method: "POST",
+    body: JSON.stringify(filtros),
+    credentials: "include",
+  });
+  return response.map((t) => normalizeApiTable(t));
+}
+
 export async function buscarMesaPorId(id: string): Promise<ApiTable> {
   const response = await apiFetch<ApiTable>(`/tables/${id}`, {
     method: "GET",

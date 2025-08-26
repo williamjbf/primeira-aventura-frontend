@@ -47,7 +47,7 @@ export default function TaggedCarouselSection({tag}: TaggedCarouselSectionProps)
           Mesas de {tag}
         </h2>
         <Link
-          href={`/tags/${tag}`}
+          href={`/table/search?tag=${encodeURIComponent(tag)}`}
           className="flex items-center gap-1 text-sm text-gray-300 hover:text-white transition-colors"
         >
           Ver mais <BiChevronRight size={18}/>
