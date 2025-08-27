@@ -6,14 +6,16 @@ interface PasswordFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   className?: string; // aceita a classe do input
 }
 
-export default function PasswordField({ label, error, className = "", ...props }: PasswordFieldProps) {
+export default function PasswordField({ label, error, className = "", name, ...props }: PasswordFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label className="block text-sm font-medium mb-1" htmlFor={name}>{label}</label>
       <div className="relative">
         <input
+          id={name}
+          name={name}
           type={showPassword ? "text" : "password"}
           className={`${className} pr-10`} // espaço para botão do olho
           {...props}
